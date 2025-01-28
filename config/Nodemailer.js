@@ -1,6 +1,7 @@
 const axios = require('axios');
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
+const readline = require('readline');
 const moment = require('moment');
 require('dotenv').config();
 
@@ -29,10 +30,10 @@ const sendEmail = async (to, subject, text, html) => {
     }
 };
 
-const sendReminderEmail = async (email, companyName, expirationDate) => {
+const sendReminderEmail = async (email, companyName, dueDate) => {
     const subject = `Document Renewal Reminder for ${companyName}`;
-    const text = `This is a reminder that ${companyName}'s annual return is due on ${expirationDate}. Please file it promptly to avoid penalties.`;
-    const html = `<p>This is a reminder that <strong>${companyName}'s</strong> annual return is due on <strong>${expirationDate}</strong>. Please file it promptly to avoid penalties.</p>`;
+    const text = `This is a reminder that ${companyName}'s annual return is due on ${dueDate}. Please file it promptly to avoid penalties.`;
+    const html = `<p>This is a reminder that <strong>${companyName}'s</strong> annual return is due on <strong>${dueDate}</strong>. Please file it promptly to avoid penalties.</p>`;
 
     const success = await sendEmail(email, subject, text, html);
     if (success) {
@@ -43,88 +44,57 @@ const sendReminderEmail = async (email, companyName, expirationDate) => {
 };
 
 const scheduleReminder = (email, companyName, annualReturnDate) => {
-    const expiration = moment(annualReturnDate, 'YYYY-MM-DD');
+    const dueDate = moment(annualReturnDate, 'YYYY-MM-DD');
 
-    if (!expiration.isValid()) {
+    if (!dueDate.isValid()) {
         console.error(`Invalid annual return date for ${companyName}: ${annualReturnDate}`);
         return;
     }
 
     const now = moment();
-    const daysUntilExpiration = expiration.diff(now, 'days');
+    const daysUntilDueDate = dueDate.diff(now, 'days');
 
-    if (daysUntilExpiration <= 0) {
+    if (daysUntilDueDate <= 0) {
         console.warn(`The annual return for ${companyName} is already due or overdue.`);
         return;
     }
 
-    const cronExpression = `0 6 ${expiration.date()} ${expiration.month() + 1} *`;
+    const cronExpression = `0 6 ${dueDate.date()} ${dueDate.month() + 1} *`; // Use "dueDate"
     console.log(`Cron expression for ${companyName}: ${cronExpression}`);
 
     cron.schedule(
         cronExpression,
         () => {
             console.log(`Sending reminder email to ${companyName}...`);
-            sendReminderEmail(email, companyName, expiration.format('YYYY-MM-DD'));
+            sendReminderEmail(email, companyName, dueDate.format('YYYY-MM-DD'));
         },
         {
             timezone: 'America/New_York',
         }
     );
 
-    console.log(`Reminder scheduled for ${companyName} on ${expiration.format('YYYY-MM-DD')}`);
+    console.log(`Reminder scheduled for ${companyName} on ${dueDate.format('YYYY-MM-DD')}`);
 };
 
-const fetchCompanyData = async () => {
-    try {
-        const response = await axios.get('https://cipc-apm-rs-dev.azure-api.net/enterprise/v1/filing-history');
-        const filingsHistoryList = response.data?.filings_history_list;
 
-        if (Array.isArray(filingsHistoryList) && filingsHistoryList.length > 0) {
-            filingsHistoryList.forEach((filing) => {
-                const { annual_return_date: annualReturnDate, status, email_address: email, company_name: companyName } = filing;
 
-                if (status === 'Active' && annualReturnDate && email) {
-                    scheduleReminder(email, companyName, annualReturnDate);
-                } else {
-                    console.warn(`Missing email or invalid data for filing:`, filing);
-                }
-            });
-        } else {
-            console.log('No filings found in the API response.');
-        }
-    } catch (error) {
-        console.error('Error fetching company data:', error.message);
-    }
-};
 
-const searchEnterprise = async (enterpriseNumber) => {
-    try {
-        const response = await axios.post('https://cipc-apm-rs-dev.azure-api.net/enterprise/v1/information', {
-            enterprise_number: enterpriseNumber,
-        }, {
-            headers: {
-                "Content-Type": "application/json"
-            }
+const getEnterpriseNumber = () => {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
         });
 
-        const data = response.data?.Enterprise;
-        if (data) {
-            console.log(`Enterprise Details for ${enterpriseNumber}:`, data);
-            return data;
-        } else {
-            console.error(`No information found for enterprise number: ${enterpriseNumber}`);
-        }
-    } catch (error) {
-        console.error('Error searching enterprise:', error.message);
-    }
+        rl.question('Enter enterprise number: ', (input) => {
+            rl.close();
+            resolve(input || process.env.ENTERPRISE_NUMBER || '2020/939681/07');
+        });
+    });
 };
 
 const main = async () => {
-    await fetchCompanyData();
-
-   
-    const enterpriseNumber = process.env.ENTERPRISE_NUMBER || '2020/939681/07';
+    const enterpriseNumber = await getEnterpriseNumber();
     const enterpriseData = await searchEnterprise(enterpriseNumber);
 
     if (enterpriseData) {
@@ -134,4 +104,4 @@ const main = async () => {
 
 main();
 
-module.exports = { sendEmail, scheduleReminder, searchEnterprise, fetchCompanyData };
+module.exports = { sendEmail, scheduleReminder };

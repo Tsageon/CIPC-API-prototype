@@ -1,28 +1,59 @@
 const express = require('express');
 const cors = require('cors');
+const { scheduleRemindersForAllCompanies, manualTriggerReminderEmail } = require('./config/Scheduler');
+const { getAllCompanies, getCompanyById, getCompanyByEnterpriseNumber } = require('./controllers/mockCipcService');
+
 const app = express();
-const businessRoutes = require('./routes/BusinessRoutes')
-
-
 app.use(express.json());
 app.use(cors());
-app.use('/api/', businessRoutes);
 
-
-app.use((err, req, res, next) => {
-    res.status(req.status || 200).json({
-        message: 'Internal Server Error.something went wrong',
-    })
-    console.error('Error stack trace:', err.stack);
-    res.status(err.status || 500).json({
-        message: 'Internal Server Error',
-        details: err.stack || err.message
-    });
-    next();
+app.get('/api/companies', (req, res) => {
+    const companies = getAllCompanies();
+    res.json(companies);
 });
 
+app.get('/api/companies/:id', (req, res) => {
+    console.log('Received ID:', req.params.id);
+    const company = getCompanyById(parseInt(req.params.id));
+    if (company) {
+        res.json(company);
+    } else {
+        res.status(404).json({ error: 'Company not found' });
+    }
+});
+
+app.post('/api/companies/trigger-reminders', (req, res) => {
+    scheduleRemindersForAllCompanies();
+    res.send('Reminders are now scheduled.');
+});
+
+app.post('/api/manual-reminder', async (req, res) => {
+    const { email, companyName, annualReturnDate } = req.body; 
+
+    if (!email || !companyName || !annualReturnDate) {
+        return res.status(400).json({ error: 'Missing required fields (email, companyName, annualReturnDate)' });
+    }
+
+    try {
+        await manualTriggerReminderEmail(email, companyName, annualReturnDate);
+        res.status(200).send('Manual reminder email sent successfully');
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to send manual reminder email' });
+    }
+});
+
+app.get('/api/companies/:enterpriseNumber', (req, res) => {
+    const { enterpriseNumber } = req.params;
+    console.log('Received Enterprise Number:', enterpriseNumber);
+    const company = getCompanyByEnterpriseNumber(enterpriseNumber);
+    if (company) {
+        res.json(company);
+    } else {
+        res.status(404).json({ error: 'Company not found' });
+    }
+});
 
 const PORT = 4000;
 app.listen(PORT, () => {
-    console.log(`I am running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
