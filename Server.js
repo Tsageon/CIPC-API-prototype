@@ -1,11 +1,17 @@
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/mongodb')
 const { scheduleRemindersForAllCompanies, manualTriggerReminderEmail } = require('./config/Scheduler');
 const { getAllCompanies, getCompanyById, getCompanyByEnterpriseNumber } = require('./controllers/mockCipcService');
-
+const companyRoutes = require('./routes/CompanyR');
 const app = express();
+
+connectDB();
 app.use(express.json());
 app.use(cors());
+
+
+app.use('/api/', companyRoutes);
 
 app.get('/api/companies', (req, res) => {
     const companies = getAllCompanies();

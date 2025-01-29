@@ -16,16 +16,16 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (to, subject, text, html) => {
     try {
         const info = await transporter.sendMail({
-            from: `"Document Renewal Notification" <${process.env.EMAIL_USER}>`,
+            from: `🚀"Document Renewal Company Compliance" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             text,
             html,
         });
-        console.log('Email sent: %s', info.messageId);
+        console.log('📧Email sent: %s', info.messageId);
         return true;
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('❌Error sending email:', error);
         return false;
     }
 };
@@ -75,7 +75,6 @@ const scheduleReminder = (email, companyName, annualReturnDate) => {
 
     console.log(`Reminder scheduled for ${companyName} on ${dueDate.format('YYYY-MM-DD')}`);
 };
-
 
 
 

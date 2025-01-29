@@ -40,10 +40,59 @@ const companies = [
         enterprise_type_description: 'Private Company',
         sic_description: 'Retail Trade',
         name: 'AAUUUUH',
-        email: 'rethabilechomi610@gmail.com ',
+        email: 'rethabilechomi610@gmail.com',
         registration_date: '2024-01-30',
         annualReturnDate: '2025-01-30',
         tax_number: '987654322',
+    },
+    {
+        id: 5,
+        enterprise_number: 'ENT32142',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail Trade',
+        name: 'BLacKLaBoLe',
+        email: 't88segamie@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2025-01-30',
+        tax_number: '487654322',
+    },
+    {
+        id: 6,
+        enterprise_number: 'ENT32143',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail',
+        name: 'SparkX',
+        email: 'llewellyn.ml.info@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2025-01-30',
+        tax_number: '587654322'
+    },
+    {
+        id: 7,
+        enterprise_number: 'ENT32144',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail',
+        name: 'Inquixix',
+        email: 'ytmotlhalane@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2025-01-30',
+        tax_number: '687654322'
+    },
+    {
+        id: 8,
+        enterprise_number: 'ENT32145',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail',
+        name: 'OnlyMoneyIWant Inc',
+        email: 'karabelonthoroane@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2025-01-30',
+        tax_number: '787654322'
+
     }
 ];
 

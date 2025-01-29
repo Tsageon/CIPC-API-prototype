@@ -15,10 +15,9 @@ This is a Node.js and Express-based API for managing company data and scheduling
 - **Node.js**: Ensure you have Node.js installed.
 - **Dependencies**:
   - `express`
-  - `cors`
   - `moment`
   - `node-cron`
-  - Nodemailer (for sending emails)
+  - `Nodemailer` (for sending emails)
 
 ## Installation
 
