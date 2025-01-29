@@ -34,7 +34,7 @@ app.post('/api/companies/trigger-reminders', (req, res) => {
 });
 
 app.post('/api/manual-reminder', async (req, res) => {
-    const { email, companyName, annualReturnDate } = req.body; 
+    const { email, companyName, annualReturnDate } = req.body;
 
     if (!email || !companyName || !annualReturnDate) {
         return res.status(400).json({ error: 'Missing required fields (email, companyName, annualReturnDate)' });

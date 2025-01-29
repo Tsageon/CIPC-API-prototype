@@ -65,7 +65,7 @@ exports.registerCompany = async (req, res) => {
             return res.status(400).json({ error: "Invalid input data" });
         }
 
-        if (error.code === 11000) {  
+        if (error.code === 11000) {
             return res.status(400).json({ error: "Duplicate entry detected" });
         }
 
@@ -80,7 +80,7 @@ exports.getAllCompanies = async (req, res) => {
         const companies = await Company.find();
 
         const formattedCompanies = companies.map(company => ({
-            ...company._doc, 
+            ...company._doc,
             registration_date: new Date(company.registration_date).toLocaleString("en-US", { timeZone: "Africa/Johannesburg" }),
             annualReturnDate: new Date(company.annualReturnDate).toLocaleString("en-US", { timeZone: "Africa/Johannesburg" }),
         }));
@@ -97,23 +97,23 @@ exports.getAllCompanies = async (req, res) => {
 exports.searchCompany = async (req, res) => {
     try {
         const { enterprise_number, id } = req.query;
-        
+
         let query = {};
-        
+
         if (enterprise_number) {
             query.enterprise_number = enterprise_number;
         }
-        
+
         if (id) {
             query._id = id;
         }
-        
+
         const companies = await Company.find(query);
-        
+
         if (companies.length === 0) {
             return res.status(404).json({ message: "No company found" });
         }
-        
+
         res.status(200).json(companies);
     } catch (error) {
         console.error(error);
@@ -125,20 +125,20 @@ exports.searchCompany = async (req, res) => {
 exports.updateCompany = async (req, res) => {
     try {
         const company = await Company.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-        if(!company) {
+        if (!company) {
             return res.status(404).json({ error: 'Company not found' });
         }
-        res.status(200).json(company); 
+        res.status(200).json(company);
     } catch (error) {
         console.error(error)
-        res.status(500).json({error: 'Failed to update company info'})
+        res.status(500).json({ error: 'Failed to update company info' })
     }
 }
 
 exports.deleteCompany = async (req, res) => {
     try {
         const company = await Company.findByIdAndDelete(req.params.id);
-        if(!company) {
+        if (!company) {
             return res.status(404).json({ error: 'Company not found' });
         }
         res.status(200).json({ message: 'Company deleted successfully' });
