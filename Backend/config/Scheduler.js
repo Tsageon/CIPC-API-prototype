@@ -1,8 +1,8 @@
 const cron = require('node-cron');
 const moment = require('moment');
-const Company = require('../../models/Company');
+const Company = require('../models/Company');
 const { sendEmail } = require('./Nodemailer');
-const { getAllCompanies } = require('../../controllers/mockCipcService');
+const { getAllCompanies } = require('../controllers/mockCipcService');
 
 const manualTriggerReminderEmail = async (email, companyName, annualReturnDate) => {
     const subject = `Manual Document Renewal Reminder for ${companyName}`;
@@ -81,7 +81,7 @@ const scheduleReminder = (companyName, email, annualReturnDate) => {
         { expr: cronExpressionOverdue, message: 'Sending overdue reminder...' }
     ];
 
-    let reminderSent = false;
+    let reminderSent = true;
 
     scheduledJobs[companyName] = cronSchedules.map(({ expr, message }) => {
         const job = cron.schedule(expr, async () => {
@@ -129,7 +129,6 @@ cron.schedule('*/5 * * * *', async () => {
             });
         }
     }
-
     console.log("Company dates adjusted and reminders checked!");
 });
 

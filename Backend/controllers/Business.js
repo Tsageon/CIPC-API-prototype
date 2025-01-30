@@ -1,5 +1,5 @@
 const { sendEmail } = require('../config/Nodemailer');
-const { fetchCompanyData, searchEnterprise } = require('../../services/BusinessS');
+const { fetchCompanyData, searchEnterprise } = require('../services/BusinessS');
 
 exports.sendReminderEmail = async (req, res, next) => {
     try {
