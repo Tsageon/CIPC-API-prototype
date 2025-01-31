@@ -1,7 +1,5 @@
-const axios = require('axios');
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
-const readline = require('readline');
 const moment = require('moment');
 require('dotenv').config();
 
@@ -76,31 +74,28 @@ const scheduleReminder = (email, companyName, annualReturnDate) => {
     console.log(`Reminder scheduled for ${companyName} on ${dueDate.format('YYYY-MM-DD')}`);
 };
 
+cron.schedule('0 0 * * *', () => {
+    const currentDate = moment();
+    companies.forEach(company => {
+        const nextDueDate = moment(company.subscription.nextDueDate);
 
-
-const getEnterpriseNumber = () => {
-    return new Promise((resolve) => {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-
-        rl.question('Enter enterprise number: ', (input) => {
-            rl.close();
-            resolve(input || process.env.ENTERPRISE_NUMBER || '2020/939681/07');
-        });
+        if (nextDueDate.isBefore(currentDate.add(7, 'days'))) {
+            sendSubscriptionRenewalReminder(company);
+        }
     });
-};
+});
 
-const main = async () => {
-    const enterpriseNumber = await getEnterpriseNumber();
-    const enterpriseData = await searchEnterprise(enterpriseNumber);
+async function sendSubscriptionRenewalReminder(company) {
+    const subject = 'Your Subscription is Due for Renewal';
+    const text = `Dear ${company.name},\n\nYour subscription is due for renewal on ${company.subscription.nextDueDate}. Please visit our site to complete the payment process.\n\nThank you for being a valued customer!`;
+    const html = `<p>Dear <strong>${company.name}</strong>,</p><p>Your subscription is due for renewal on <strong>${company.subscription.nextDueDate}</strong>. Please visit our site to complete the payment process.</p><p>Thank you for being a valued customer!</p>`;
 
-    if (enterpriseData) {
-        console.log('Enterprise data retrieved successfully:', enterpriseData);
+    const success = await sendEmail(company.email, subject, text, html);
+    if (success) {
+        console.log(`Renewal reminder email sent to ${company.name}`);
+    } else {
+        console.error(`Failed to send renewal reminder email to ${company.name}`);
     }
-};
-
-main();
+}
 
 module.exports = { sendEmail, scheduleReminder };

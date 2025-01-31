@@ -44,6 +44,13 @@ exports.registerCompany = async (req, res) => {
         const annualReturnDate = new Date(registrationDate);
         annualReturnDate.setFullYear(annualReturnDate.getFullYear() + 1);
 
+        const subscription = {
+            plan: 'basic',  
+            last_payment_date: Date.now(),
+            next_payment_due: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Set default 30 days later
+            status: 'pending', 
+        };
+    
         const company = new Company({
             enterprise_number,
             enterprise_type_description,
@@ -53,6 +60,8 @@ exports.registerCompany = async (req, res) => {
             registration_date: registrationDate,
             annualReturnDate,
             tax_number,
+            subscription,  
+            status: "pending"
         });
 
         await company.save();
@@ -70,12 +79,11 @@ exports.registerCompany = async (req, res) => {
         }
 
         res.status(500).json({ error: "Failed to register company due to an internal error" });
-    }
-};
+    }};
 
 
 
-exports.getAllCompanies = async (req, res) => {
+exports.getAllCompanies = async (res) => {
     try {
         const companies = await Company.find();
 

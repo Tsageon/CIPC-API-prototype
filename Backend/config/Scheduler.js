@@ -2,7 +2,152 @@ const cron = require('node-cron');
 const moment = require('moment');
 const Company = require('../models/Company');
 const { sendEmail } = require('./Nodemailer');
-const { getAllCompanies } = require('../controllers/mockCipcService');
+
+const companies = [
+    {
+        id: 1,
+        enterprise_number: 'ENT12345',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Sole Proprietorship',
+        name: 'Sausage Party',
+        email: 'mylasjacob18.5@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '345632167',
+        subscription: {
+            tier: 'Basic',
+            isActive: false,
+            lastPaymentDate: '2025-01-01',
+            nextDueDate: '2025-02-01'
+        }
+    },
+    {
+        id: 2,
+        enterprise_number: 'ENT67890',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Corporation',
+        name: 'WHY Code!tm',
+        email: 'ayandasontlaba6@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '234567891',
+        subscription: {
+            tier: 'Basic',
+            isActive: false,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-28'
+        }
+    },
+    {
+        id: 3,
+        enterprise_number: 'ENT11223',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Manufacturing',
+        name: 'Cassanova United',
+        email: 'khanyajara@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '123456789',
+        subscription: {
+            tier: 'Professional',
+            isActive: true,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-28'
+        }
+    },
+    {
+        id: 4,
+        enterprise_number: 'ENT45678',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail Trade',
+        name: 'AAUUUUH',
+        email: 'rethabilechomi610@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '987654322',
+        subscription: {
+            tier: 'Basic',
+            isActive: true,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-28'
+        }
+    },
+    {
+        id: 5,
+        enterprise_number: 'ENT32142',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail Trade',
+        name: 'BLacKLaBoLe',
+        email: 't88segamie@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '487654322',
+        subscription: {
+            tier: 'Enterprise',
+            isActive: true,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-10'
+        }
+    },
+    {
+        id: 6,
+        enterprise_number: 'ENT32143',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail',
+        name: 'SparkX',
+        email: 'llewellyn.ml.info@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '587654322',
+        subscription: {
+            tier: 'Basic',
+            isActive: true,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-28'
+        }
+    },
+    {
+        id: 7,
+        enterprise_number: 'ENT32144',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail',
+        name: 'Inquixix',
+        email: 'ytmotlhalane@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2026-01-30',
+        tax_number: '687654322',
+        subscription: {
+            tier: 'Basic',
+            isActive: true,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-28'
+        }
+    },
+    {
+        id: 8,
+        enterprise_number: 'ENT32145',
+        enterprise_status_description: 'Active',
+        enterprise_type_description: 'Private Company',
+        sic_description: 'Retail',
+        name: 'OnlyMoneyIWant Inc',
+        email: 'karabelonthoroane@gmail.com',
+        registration_date: '2024-01-30',
+        annualReturnDate: '2025-01-30',
+        tax_number: '787654322',
+        subscription: {
+            tier: 'Basic',
+            isActive: true,
+            lastPaymentDate: '2025-01-30',
+            nextDueDate: '2025-02-28'
+        }
+
+    }
+];
 
 const manualTriggerReminderEmail = async (email, companyName, annualReturnDate) => {
     const subject = `Manual Document Renewal Reminder for ${companyName}`;
@@ -132,9 +277,62 @@ cron.schedule('*/5 * * * *', async () => {
     console.log("Company dates adjusted and reminders checked!");
 });
 
+const checkSubscriptions = async () => {
+    console.log('⏳ Running subscription check...');
 
-const scheduleRemindersForAllCompanies = () => {
-    const companies = getAllCompanies();
+    const currentDate = moment();
+
+    for (const company of companies) {
+        if (!company.subscription?.nextDueDate) {
+            console.error(`⚠️ Missing nextDueDate for ${company.name}`);
+            continue;
+        }
+
+        const nextDueDate = moment(company.subscription.nextDueDate, 'YYYY-MM-DD', true);
+        if (!nextDueDate.isValid()) {
+            console.error(`❌ Invalid date format: ${company.subscription.nextDueDate}`);
+            continue;
+        }
+
+        const daysUntilDue = nextDueDate.diff(currentDate, 'days');
+
+        console.log(`🔍 ${company.name} - Days Until Due: ${daysUntilDue}`);
+
+        if (company.subscription.isActive && daysUntilDue <= 7 && daysUntilDue > 0) {
+            console.log(`📩 Sending email to ${company.email}...`);
+
+            const subject = 'Subscription Renewal Reminder';
+            const text = `Hi ${company.name},\n\nYour subscription is about to expire in ${daysUntilDue} days. Please renew it to avoid any interruptions.\n\nBest regards,\nDeez`;
+            const html = `<p>Hi ${company.name},</p><p>Your subscription is about to expire in ${daysUntilDue} days. Please renew it to avoid any interruptions.</p><p>Best regards,<br>Nuts</p>`;
+
+            try {
+                const emailSent = await sendEmail(company.email, subject, text, html);
+                if (emailSent) {
+                    console.log(`📧 Reminder email sent to ${company.name}`);
+                } else {
+                    console.error(`❌ Failed to send reminder email to ${company.name}`);
+                }
+            } catch (error) {
+                console.error(`❌ Email sending error: ${error.message}`);
+            }
+        } else {
+            console.log(`📆 No email needed for ${company.name}. Subscription is valid.`);
+        }
+    }
+
+    console.log('✅ Subscription check completed.');
+};
+
+cron.schedule('* * * * *', async () => {
+    await checkSubscriptions();
+    console.log('⏰ Daily subscription check ran.');
+});
+
+checkSubscriptions()
+
+
+const scheduleRemindersForAllCompanies = () => { 
+    console.log('Companies inside scheduleRemindersForAllCompanies:', companies); 
     companies.forEach(company => {
         const { name, email, annualReturnDate } = company;
         scheduleReminder(name, email, annualReturnDate);

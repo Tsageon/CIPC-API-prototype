@@ -14,6 +14,12 @@ const CompanySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    subscription: {
+        plan: { type: String, enum: ['basic', 'professional', 'enterprise'], default: 'basic' },
+        last_payment_date: { type: Date, default: Date.now },
+        next_payment_due: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+        status: { type: String, enum: ['active', 'inactive', 'overdue','pending'], default: 'pending' }
+    },
     companyName: {
         type: String,
         required: true,
