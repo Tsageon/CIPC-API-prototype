@@ -3,6 +3,7 @@ const paypalClient = require('../config/Paypal');
 const paypal = require('@paypal/checkout-server-sdk');
 const express = require('express');
 const router = express.Router();
+require('dotenv').config();
 
 router.get('/sub-status/:id', async (req, res) => {
     const { id } = req.params;
@@ -96,8 +97,8 @@ router.post('/make-payment/:id', async (req, res) => {
                 }
             ],
             application_context: {
-                return_url: 'http://localhost:4000/api/companies/pay/approve',
-                cancel_url: 'http://localhost:4000/api/companies/pay/back',
+                return_url: `${process.env.HOSTED_URL}/api/companies/pay/approve`,
+                cancel_url: `${process.env.HOSTED_URL}/api/companies/pay/back`,
             }
         });
 
@@ -117,7 +118,6 @@ router.post('/make-payment/:id', async (req, res) => {
         res.status(500).json({ message: 'Error creating PayPal order' });
     }
 });
-
 
 router.post('/save-payment/:id', async (req, res) => {
     const { id } = req.params;
