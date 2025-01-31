@@ -4,30 +4,28 @@ const checkSubscription = require('../middleware/CheckAccess');
 const attachCompany = require('../middleware/AttachCompany');
 const router = express.Router();
 
-router.use(attachCompany)
-
 router.get('/getCompanies', CompanyController.getAllCompanies);
-router.get('/search', checkSubscription(['basic', 'professional', 'enterprise']), CompanyController.searchCompany);
-router.get("/legal-templates", checkSubscription("legalTemplates"), (req, res) => {
+router.get('/search', attachCompany, checkSubscription(['basic', 'professional', 'enterprise']), CompanyController.searchCompany);
+router.get("/legal-templates", attachCompany, checkSubscription("legalTemplates"), (req, res) => {
     const { subscription } = req.company;
     res.json({
         message: `You have access to ${tierFeatures[subscription.plan].legalTemplates} legal templates.`,
     });
 });
 
-router.get("/business-advice", checkSubscription("businessAdvice"), (req, res) => {
+router.get("/business-advice", attachCompany, checkSubscription("businessAdvice"), (req, res) => {
     res.json({ message: "You have access to business advice." });
 });
 
-router.get("/compliance-tools", checkSubscription("complianceTools"), (req, res) => {
+router.get("/compliance-tools", attachCompany, checkSubscription("complianceTools"), (req, res) => {
     res.json({ message: "You have access to compliance tools." });
 });
 
-router.get("/agent-commissions", checkSubscription("agentCommissions"), (req, res) => {
+router.get("/agent-commissions", attachCompany, checkSubscription("agentCommissions"), (req, res) => {
     res.json({ message: "You have access to agent commissions." });
 });
 
-router.get("/certifications", checkSubscription("certifications"), (req, res) => {
+router.get("/certifications", attachCompany, checkSubscription("certifications"), (req, res) => {
     const { subscription } = req.company;
     res.json({
         message: `You have access to ${tierFeatures[subscription.plan].certifications} certifications.`,
