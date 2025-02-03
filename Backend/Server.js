@@ -16,7 +16,7 @@ app.use(cors());
 
 app.use('/api/', mockRoutes);
 app.use('/api/payment', paymentRoutes);
-app.use('/api/stripe',webhookRoutes)
+app.use('/api/stripe', webhookRoutes)
 app.use('/api/companies', companyRoutes);
 app.use('/api/companies/stripe', checkoutRoutes);
 app.use('/api/companies/pay', mongoPaymentRoutes);

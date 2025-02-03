@@ -44,7 +44,7 @@ router.post('/payment/:id', async (req, res) => {
     }
 });
 
-router.get('/approve', async (req, res) => {
+router.get('/success', async (req, res) => {
     const { session_id } = req.query;
     if (!session_id) return res.status(400).json({ message: 'Missing session ID' });
 
