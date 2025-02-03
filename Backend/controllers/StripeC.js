@@ -33,7 +33,7 @@ router.post('/payment/:id', async (req, res) => {
                 },
                 quantity: 1
             }],
-            success_url: `${process.env.HOSTED_URL}/companies/stripe/success`,
+            success_url: `${process.env.HOSTED_URL}/api/companies/stripe/success`,
             cancel_url: `${process.env.HOSTED_URL}/api/companies/stripe/cancel`
         });
 
