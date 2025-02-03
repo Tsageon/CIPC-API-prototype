@@ -20,7 +20,7 @@ router.post('/payment/:id', async (req, res) => {
         if (!availableSubs[sub]) return res.status(400).json({ message: 'Invalid subscription plan' });
 
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
+            payment_method_types: ['card', 'link'],
             mode: 'subscription',
             customer_email: company.email,
             client_reference_id: company.enterprise_number, 
@@ -33,8 +33,8 @@ router.post('/payment/:id', async (req, res) => {
                 },
                 quantity: 1
             }],
-            success_url: `${process.env.HOSTED_URL}/success`,
-            cancel_url: `${process.env.HOSTED_URL}/cancel`
+            success_url: `${process.env.HOSTED_URL}companies/stripe/success`,
+            cancel_url: `${process.env.HOSTED_URL}companies/stripe/cancel`
         });
 
         res.status(200).json({ sessionId: session.id, url: session.url });
