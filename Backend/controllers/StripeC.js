@@ -4,7 +4,6 @@ const moment = require('moment');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Company = require('../models/Company');
 
-
 router.post('/payment/:id', async (req, res) => {
     const { id } = req.params;
     const { sub, enterprise_number } = req.body;
@@ -54,8 +53,10 @@ router.get('/success', async (req, res) => {
 
         const company = await Company.findOne({ enterprise_number: session.client_reference_id });
         if (company) {
+            const purchasedPlan = session.metadata.subscription_type;  
+
             company.subscription = {
-                plan: session.metadata.subscription_type,
+                plan: purchasedPlan, 
                 status: 'active',
                 last_payment_date: moment().format('YYYY-MM-DD'),
                 next_payment_due: moment().add(1, 'months').format('YYYY-MM-DD')
@@ -69,6 +70,7 @@ router.get('/success', async (req, res) => {
         res.status(500).json({ message: 'Error verifying payment' });
     }
 });
+
 
 router.get('/cancel', async (res) => {
     res.status(200).json({ message: 'Payment was canceled. Please try again.' });
